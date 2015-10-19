@@ -41,7 +41,7 @@ def scrape_term(t)
       data[:votes] -= 1 if t[:term] == '14' and data[:name] == 'Tuakeu Tangatapoto'
       data
     }.compact.sort_by { |d| d[:votes] }.reverse.first
-    ScraperWiki.save_sqlite([:name, :constituency], winner)
+    ScraperWiki.save_sqlite([:name, :term, :constituency], winner)
   end
 end
 
