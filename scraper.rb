@@ -21,14 +21,10 @@ def noko_for(url)
 end
 
 def scrape_term(t)
-  term = t[:term]
-  year = t[:year]
-  headline = t[:headline]
-  url = t[:source]
-  noko = noko_for(url)
-  section = noko.xpath('.//h3/span[@class="mw-headline" and contains(.,"%s")]' % headline)
+  noko = noko_for(t[:source])
+  section = noko.xpath('.//h3/span[@class="mw-headline" and contains(.,"%s")]' % t[:headline])
   section.xpath('.//following::table[.//th[contains(.,"Candidate")]]').each do |table|
-    constituency = table.css('tr').first.text[/#{year}: (.*)/, 1]
+    constituency = table.css('tr').first.text[/#{t[:year]}: (.*)/, 1]
     winner = table.xpath('.//tr[td]').map { |tr|
       tds = tr.css('td')
       next if tds.any? { |td| td.attr('colspan') }
@@ -38,11 +34,11 @@ def scrape_term(t)
         party: tds[0].text.tidy,
         constituency: constituency,
         votes: tds[2].text.to_i,
-        term: 12,
-        source: url,
+        term: t[:term],
+        source: t[:source],
       }
       # https://en.wikipedia.org/wiki/Mitiaro_by-election_2014
-      data[:votes] -= 1 if term == '14' and data[:name] == 'Tuakeu Tangatapoto'
+      data[:votes] -= 1 if t[:term] == '14' and data[:name] == 'Tuakeu Tangatapoto'
       data
     }.compact.sort_by { |d| d[:votes] }.reverse.first
     ScraperWiki.save_sqlite([:name, :constituency], winner)
