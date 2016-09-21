@@ -24,18 +24,17 @@ def scrape_term(t)
   noko = noko_for(t[:source])
   section = noko.xpath('.//h3/span[@class="mw-headline" and contains(.,"%s")]' % t[:headline])
   section.xpath('.//following::table[.//th[contains(.,"Candidate")]]').each do |table|
-    constituency = table.css('tr').first.text[/#{t[:year]}: (.*)/, 1]
+    constituency = table.css('caption').first.text[/#{t[:year]}: (.*)/, 1]
     winner = table.xpath('.//tr[td]').map do |tr|
       tds = tr.css('td')
       next if tds.any? { |td| td.attr('colspan') }
       data = {
-        name: tds[1].text.tidy,
-        wikiname: tds[1].xpath('.//a[not(@class="new")]/@title').text,
-        party: tds[0].text.tidy,
+        name: tds[2].text.tidy,
+        wikiname: tds[2].xpath('.//a[not(@class="new")]/@title').text,
+        party: tds[1].text.tidy,
         constituency: constituency,
-        votes: tds[2].text.to_i,
+        votes: tds[3].text.to_i,
         term: t[:term],
-        source: t[:source]
       }
       # https://en.wikipedia.org/wiki/Mitiaro_by-election_2014
       data[:votes] -= 1 if t[:term] == '14' && data[:name] == 'Tuakeu Tangatapoto'
