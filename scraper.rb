@@ -35,11 +35,12 @@ def scrape_term(t)
         constituency: constituency,
         votes:        tds[3].text.to_i,
         term:         t[:term],
-      }
+      } rescue binding.pry
       # https://en.wikipedia.org/wiki/Mitiaro_by-election_2014
       data[:votes] -= 1 if t[:term] == '14' && data[:name] == 'Tuakeu Tangatapoto'
       data
     end.compact.sort_by { |d| d[:votes] }.reverse.first
+    puts winner.reject { |_, v| v.to_s.empty? }.sort_by { |k, _| k }.to_h if ENV['MORPH_DEBUG']
     ScraperWiki.save_sqlite(%i(name term constituency), winner)
   end
 end
