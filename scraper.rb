@@ -25,7 +25,7 @@ def scrape_term(t)
   section = noko.xpath('.//h3/span[@class="mw-headline" and contains(.,"%s")]' % t[:headline])
   section.xpath('.//following::table[.//th[contains(.,"Candidate")]]').each do |table|
     constituency = table.css('caption').first.text[/#{t[:year]}: (.*)/, 1]
-    winner = table.xpath('.//tr[td]').map do |tr|
+    winner = table.xpath('.//tr[td[4]]').map do |tr|
       tds = tr.css('td')
       next if tds.any? { |td| td.attr('colspan') }
       data = {
